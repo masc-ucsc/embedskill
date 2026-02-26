@@ -1,59 +1,93 @@
-# Board-Aware Coding Agents - Initial Skill Definitions
+# Board-Aware Coding Agents — Skill Definitions
 
 ## Project Overview
 
-This project aims to develop a stand-alone infrastructure for board-aware coding agents. The core idea is to create structured "skills" that describe specific embedded boards and software platforms. These skills provide coding agents (like Gemini, Claude Code, or Codex) with the necessary hardware and software context to generate correct, compilable, and board-specific embedded software for a given task.
+Structured "skill" files that give coding agents (Claude Code, Gemini, Codex, etc.) the hardware and software context needed to generate correct, compilable, board-specific embedded firmware. Skills are split into two concerns:
 
-This initial phase focuses on defining these skill structures for two key components:
+- **Board configs** — hardware characteristics, pin mappings, peripherals, reset procedures
+- **Platform configs** — toolchain, SDK, build/flash commands, workflow guidelines
 
-1.  **Board Skill**: Describes the hardware characteristics of a specific development board.
-2.  **Platform Skill**: Defines the software environment (toolchain, SDK, RTOS, build/flash commands) used for that board.
+---
 
-## Current Progress
+## Repository Structure
 
-We have defined initial Markdown-based skill files for an **ESP32-C3-DevKit-Rust-1 v1.2** board using the **ESP-IDF** software platform.
+```
+embedskill/
+├── data/
+│   ├── board/          # Per-board Markdown config files
+│   └── framework/      # Per-platform Markdown config files
+└── scripts/
+    └── validate_board_config.py  # Board config linter / CI gate
+```
 
-### 1. Board Skill: `data/board/esp32_board_skill.md`
+---
 
-This file provides a detailed description of the `ESP3-C3-DevKit-Rust-1 v1.2` board. It focuses on the essential information an AI agent needs to interact with the hardware:
+## Board Configurations (`data/board/`)
 
-*   **`board_name`**: "ESP3-C3-DevKit-Rust-1 v1.2"
-*   **`mcu`**: "ESP3-C3-MINI-1"
-*   **`core_architecture`**: "RISC-V single-core"
-*   **`gpio_mappings`**: A list of GPIO pins, their primary functions, and any specific notes (e.g., connected to onboard components, ADC capabilities, I2C/UART roles). For example, it identifies GPIO7 for the onboard LED and GPIO10/GPIO8 for I2C SDA/SCL.
-*   **`onboard_components`**: Descriptions of integrated components like the WS2812 LED, Built-in LED, Boot Button, and USB-UART Bridge, along with their connected GPIOs.
-*   **`flashing_boot_constraints`**: Instructions on how to enter bootloader mode and reset the board, crucial for programming.
+Each file follows the naming convention `board_arduino_<name>.md` or `board_idf_<name>.md`.
 
-### 2. Platform Skill: `data/framework/esp_idf_platform_skill.md`
+| File | Board | MCU |
+|------|-------|-----|
+| `board_arduino_uno_r4_minima.md` | Arduino UNO R4 Minima (ABX00080) | Renesas R7FA4M1AB3CFM — Arm Cortex-M4 @ 48 MHz |
+| `board_arduino_nano_r4.md` | Arduino Nano R4 (ABX00143) | Renesas RA4M1 — Arm Cortex-M4 @ 48 MHz |
+| `board_arduino_nano33_ble_rev2.md` | Arduino Nano 33 BLE Rev2 (ABX00071/72) | Nordic nRF52840 — Arm Cortex-M4F @ 64 MHz |
+| `board_arduino_nano_esp32.md` | Arduino Nano ESP32 (ABX00083) | ESP32-S3 — Xtensa LX7 dual-core @ 240 MHz |
+| `board_arduino_nano_matter.md` | Arduino Nano Matter (ABX00112/137) | Silicon Labs MGM240SD22VNA — Arm Cortex-M33 @ 78 MHz |
+| `board_idf_esp32_c3.md` | ESP32-C3-DevKit-RUST-1 | ESP32-C3 — RISC-V single-core @ 160 MHz |
 
-This file defines the software development environment for boards using the Espressif IoT Development Framework (ESP-IDF):
+Each board file covers: Board Overview metadata, Project Setup, Supported Platforms, Pin Reference tables, On-Board Peripherals, Factory Reset steps, Power Notes, and Additional Resources.
 
-*   **`platform_name`**: "ESP-IDF"
-*   **`version`**: This field is currently a placeholder and should be updated with the specific ESP-IDF version in use (e.g., `v5.1`).
-*   **`supported_boards`**: Lists boards compatible with this platform, currently including `ESP3-C3-DevKit-Rust-1 v1.2`.
-*   **`rtos`**: Identifies FreeRTOS as the default Real-Time Operating System.
-*   **`toolchain_info`**: Provides general details about the necessary compiler and tools.
-*   **`environment_setup`**: Commands required to set up the ESP-IDF environment (e.g., sourcing `export.sh`).
-*   **`build_commands`**: Standard build commands (e.g., `idf.py build`, `idf.py clean`).
-*   **`flash_commands`**: Commands for flashing firmware and monitoring serial output (e.g., `idf.py -p /dev/ttyUSB0 flash`). The serial port (`/dev/ttyUSB0`) is a common placeholder and may need adjustment for your specific system.
-*   **`configuration_options`**: Command for accessing SDK configuration (`idf.py menuconfig`).
+---
 
-## How Coding Agents Utilize These Skills
+## Platform Configurations (`data/framework/`)
 
-The separation of board and platform details allows a coding agent to understand abstract tasks and generate specific code:
+| File | Description |
+|------|-------------|
+| `platform_config.md` | Master config — tool selection logic, mandatory initialization sequence, references to board and platform files |
+| `platform_arduino.md` | HAgent Arduino tool guide (`hagent.arduino`) — covers `install`, `refresh_config`, `list_boards`, `new_sketch`, `compile`, `upload`, `monitor` |
+| `platform_esp32.md` | HAgent ESP32 tool guide (`hagent.esp32`) — covers `install`, `refresh_config`, `setup`, `build`, `flash`, `check_bootloader`, `monitor`, `idf` |
 
-1.  **Parsing:** The agent first ingests both the board and platform skill Markdown files to build a comprehensive understanding of the target hardware and software stack.
-2.  **Reasoning for Board-Independent Benchmarks:**
-    *   **Example Task: "Blink the onboard LED."**
-        *   The agent queries the **board skill** to find which GPIO is connected to the "Built-in LED" (e.g., GPIO7 for the ESP32-C3-DevKit-Rust-1 v1.2).
-        *   It then consults the **platform skill** to understand the ESP-IDF framework, identifying relevant API calls (e.g., `gpio_set_direction`, `gpio_set_level` from `driver/gpio.h`).
-        *   Combining this, the agent generates C/C++ code that includes the correct headers, configures GPIO7 as an output, and toggles its level with delays using FreeRTOS tasks.
+---
 
-This modular approach ensures that tasks can be defined generically, while the agent, armed with the appropriate skills, can translate them into correct, compilable code for a diverse range of embedded systems.
+## Validating Board Configs (`scripts/validate_board_config.py`)
 
-## Next Steps
+A linter that checks board config Markdown files against the required format before they are merged. Exits `0` if all files pass, `1` if any errors are found — usable as a CI gate.
 
-*   Review the content and structure of `data/board/esp32_board_skill.md` and `data/framework/esp_idf_platform_skill.md` for accuracy and completeness.
-*   Populate the `version` field in `data/framework/esp_idf_platform_skill.md` with the exact ESP-IDF version being used.
-*   Verify and adjust the serial port in `flash_commands` within `data/framework/esp_idf_platform_skill.md` if `/dev/ttyUSB0` is not correct for your environment.
-*   Begin exploring initial benchmark tasks (e.g., GPIO toggle, button interrupt, I2C sensor read) to test the agent's ability to utilize these skills.
+### Usage
+
+```bash
+# Single file
+python3 scripts/validate_board_config.py data/board/board_arduino_nano_r4.md
+
+# All boards in a directory
+python3 scripts/validate_board_config.py data/board/
+
+# Multiple specific files
+python3 scripts/validate_board_config.py file1.md file2.md
+```
+
+### Checks
+
+**Structural (hard errors):**
+
+1. Filename starts with `board_arduino_` or `board_idf_`
+2. H1 title present (warning if it doesn't end with `Board Notes`)
+3. `## Project Setup` present — with `**Build system**`, `**Project structure**`, `**Build/Flash commands**`
+4. `## Supported Platforms` present and non-empty
+5. `## Board Overview` present
+6. `## Pin Reference` present — with at least one `|`-delimited table
+7. `## Factory Reset` present (any suffix) — with at least one numbered step
+8. `## Power Notes` present
+9. `## Additional Resources` present — with at least one `https://` URL
+
+**Metadata fields within `## Board Overview` (hard errors):**
+
+10. `` `board` `` field present and non-empty
+11. `` `model` `` field present and non-empty
+12. `` `fqbn` `` present — Arduino boards only (detected from filename prefix)
+13. `` `core` `` present — Arduino boards only
+
+**Warnings (soft):**
+
+14. H1 title doesn't end with `Board Notes`
+15. `## On-Board Peripherals` section missing
