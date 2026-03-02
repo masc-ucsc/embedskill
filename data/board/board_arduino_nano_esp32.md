@@ -11,12 +11,9 @@
   - Monitor: `arduino-cli monitor -p <PORT>`
 
 ## Supported Platforms
+- **Arduino**
 
-- **ESP-IDF** (Recommended)
-  > **Note:** This is the primary recommended platform due to more reliable port detection and communication, and because the board features an ESP32-S3 SoC.
-
-- **Arduino CLI** (Fallback)
-  > **Note:** While supported, port detection and communication are often unreliable. Even when the board appears as a serial port and flashing is attempted directly, successful communication is not guaranteed. This makes it a last resort if ESP-IDF absolutely fails. The board may not appear with its name and FQBN when using `arduino-cli board list` or the MCP tool that lists connected Arduino boards.
+> **Note:** This board may not appear with its name and FQBN when using `arduino-cli board list` or the MCP tool that lists connected Arduino boards. It often shows up only as a Serial Port (USB). Flash directly to that port — do not rely on board listing to identify it.
 
 ## Board Overview
 - `board`: nano_esp32
@@ -132,6 +129,8 @@ The ESP32-S3 supports four reset levels: CPU reset, Core reset (preserves RTC pe
 > **Note:** CIPO/COPI/CS replaces the MISO/MOSI/SS terminology. All pins are PWM-capable (~) unless otherwise noted.
 
 ## Factory Reset / Board Recovery
+
+If the board does not show up in the listed ports after basic checks (cable, power, driver, reset), you may need to reset the bootloader. See: https://support.arduino.cc/hc/en-us/articles/9810414060188-Reset-the-Arduino-bootloader-on-the-Nano-ESP32
 
 If the board is unresponsive or not reachable via USB, it can be recovered using the built-in bootloader:
 
