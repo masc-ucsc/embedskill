@@ -17,8 +17,140 @@ embedskill/
 │   ├── board/          # Per-board Markdown config files
 │   └── framework/      # Per-platform Markdown config files
 └── scripts/
+    ├── install_skill.py          # Installs selected skills into a user project
+    ├── quick_start.py          # Creates a starter workspace/project
     └── validate_board_config.py  # Board config linter / CI gate
 ```
+
+---
+
+## End-User Workflow
+
+The `embedskill` repository is a reusable skill registry. End users should generate firmware in their own project directories, not inside this repository.
+
+Recommended layout:
+
+```text
+~/embedded/embedskill/          # skill registry
+~/projects/my-firmware/         # user's actual firmware project
+```
+
+### Quickstart: Create a Starter Project
+
+For a first test, use the starter script. It creates a workspace, creates a board-specific LED blink project, installs the selected skill context, and prints the next prompt to try.
+
+```bash
+python3 scripts/quick_start.py --board uno_q
+```
+
+By default, this creates:
+
+```text
+~/embedskill_workspace/
+└── arduino_uno_q_led_blink/
+    ├── AGENTS.md
+    └── README.md
+```
+
+Then start your coding agent from the generated project:
+
+```bash
+cd ~/embedskill_workspace/arduino_uno_q_led_blink
+codex
+```
+
+Example prompt:
+
+```text
+Read AGENTS.md. Generate a minimal LED blink program for this board.
+Use the correct board pin constants and build workflow from the installed skill.
+Create the source files in this project directory.
+```
+
+The starter script supports custom boards, workspaces, and project names:
+
+```bash
+python3 scripts/quick_start.py \
+  --board arduino_uno_q \
+  --workspace ~/embedskill_workspace \
+  --project-name unoq_led_blink
+```
+
+### Manual Setup: New Project
+
+Create your own project directory first:
+
+```bash
+mkdir -p ~/projects/my-firmware
+cd ~/projects/my-firmware
+```
+
+From the user's firmware project, install the selected board and platform context:
+
+```bash
+python3 ~/embedded/embedskill/scripts/install_skill.py \
+  --board arduino_uno_q \
+  --platform arduino
+```
+
+This creates a project-local context file:
+
+```text
+~/projects/my-firmware/AGENTS.md
+```
+
+The user should then start the coding agent from the firmware project directory:
+
+```bash
+cd ~/projects/my-firmware
+codex
+```
+
+Generated code, sketches, build files, and tests stay in the user's project directory. The `embedskill` repository remains only the source of reusable board and platform skills.
+
+### Existing Project Integration
+
+For an existing firmware project, run `install_skill.py` from that project directory:
+
+```bash
+cd ~/projects/existing-firmware
+python3 ~/embedded/embedskill/scripts/install_skill.py --board uno_q
+```
+
+This adds `AGENTS.md` to the existing project without moving source code into the `embedskill` repository. Existing output files are not overwritten unless `--force` is passed.
+
+### Installing Skills
+
+List available boards and platforms:
+
+```bash
+python3 scripts/install_skill.py --list
+```
+
+Install an Arduino UNO Q skill into the current directory:
+
+```bash
+python3 /path/to/embedskill/scripts/install_skill.py --board uno_q
+```
+
+Install into a specific project directory:
+
+```bash
+python3 /path/to/embedskill/scripts/install_skill.py \
+  --board arduino_uno_q \
+  --platform arduino \
+  --project-dir ~/projects/my-firmware
+```
+
+By default, the script writes `AGENTS.md`. Use `--output` to target another agent context file:
+
+```bash
+python3 /path/to/embedskill/scripts/install_skill.py \
+  --board arduino_uno_q \
+  --output CLAUDE.md
+```
+
+Existing output files are not overwritten unless `--force` is passed.
 
 ---
 
@@ -43,9 +175,9 @@ Each board file covers: Board Overview metadata, Project Setup, Supported Platfo
 
 | File | Description |
 |------|-------------|
-| `platform_config.md` | Master config — tool selection logic, mandatory initialization sequence, references to board and platform files |
-| `platform_arduino.md` | HAgent Arduino tool guide (`hagent.arduino`) — covers `install`, `refresh_config`, `list_boards`, `new_sketch`, `compile`, `upload`, `monitor` |
-| `platform_esp32.md` | HAgent ESP32 tool guide (`hagent.esp32`) — covers `install`, `refresh_config`, `setup`, `build`, `flash`, `check_bootloader`, `monitor`, `idf` |
+| `platform_config.md` | Master config — toolchain selection logic and general agent workflow |
+| `platform_arduino.md` | Arduino workflow guide using `arduino-cli` |
+| `platform_esp32.md` | ESP32 workflow guide using ESP-IDF (`idf.py`) and `esptool.py` |
 
 ---
 
