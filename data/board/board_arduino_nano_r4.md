@@ -118,18 +118,18 @@ If the board is unresponsive or you need to verify it, follow this "Recipe". **I
 1.  **Enter Bootloader**:
     - **Instruct**: **CRITICAL:** Ask the user to double-tap the **RESET** button (PB1) quickly right after power-up. Explicitly tell the user: "You MUST manually double-tap the button; do not rely on the tool's auto-reset."
     - **Confirm**: Wait for the user to confirm they have done this.
-    - **Verify**: Use `hagent_arduino` with `api='list_boards'`. It should appear with FQBN `arduino:renesas_uno:nanor4`.
+    - **Verify**: Run `arduino-cli board list`. It should appear with FQBN `arduino:renesas_uno:nanor4`.
     - **Troubleshoot**: If not found, ask user to try again or check cable.
 
 2.  **Upload Test**:
     - **Instruct**: Tell the user you are ready to upload the Blink sketch.
     - **Confirm**: Wait for the user to reply "Ready" or "Go ahead".
-    - **Action**: Use `hagent_arduino` with `api='compile'` (defaults to Blink).
-    - **Action**: Use `hagent_arduino` with `api='upload'`.
+    - **Action**: Compile the sketch with `arduino-cli compile --fqbn arduino:renesas_uno:nanor4 <sketch_name>`.
+    - **Action**: Upload with `arduino-cli upload -p <PORT> --fqbn arduino:renesas_uno:nanor4 <sketch_name>`.
     - **Verify**: Ask user if the built-in LED (L) is blinking.
 
 3.  **Monitor**:
-    - **Action**: Use `hagent_arduino` with `api='monitor'` to check for serial output.
+    - **Action**: Use `arduino-cli monitor -p <PORT>` to check for serial output.
 
 ## Power Notes
 - **USB-C® input**: 4.8–5.5 V; max 500 mA (USB 2.0 limited). Do not exceed 5 V via USB-C®.

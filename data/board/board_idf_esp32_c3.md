@@ -92,14 +92,14 @@ If the board is unresponsive or you need to restore the factory state, follow th
 1.  **Enter Bootloader**:
     - **Instruct**: Ask the user to: Unplug USB, Hold BOOT button (GPIO9), Plug USB while holding BOOT, Release BOOT.
     - **Confirm**: Wait for the user to reply that they have done this.
-    - **Verify**: Use `hagent_esp32` with `api='check_bootloader'`. If this fails, ask the user to check cables/drivers and retry Step 1.
+    - **Verify**: Run `esptool.py --chip esp32c3 --port <PORT> chip_id`. If this fails, ask the user to check cables/drivers and retry Step 1.
 2.  **Flash**:
-    - Use `hagent_esp32` with `api='flash'`.
+    - Use `idf.py -p <PORT> flash`.
 3.  **Finalize & Verify**:
     - **Instruct**: Ask the user to press the **RESET** button on the board.
     - **Confirm**: Wait for the user to reply that they have pressed Reset.
-    - **Verify**: Use `hagent_esp32` with `api='check_bootloader'` to confirm the board is connected.
-    - **Monitor**: Use `hagent_esp32` with `api='monitor'` and `timeout=15` to see the new firmware output.
+    - **Verify**: Run `esptool.py --chip esp32c3 --port <PORT> chip_id` to confirm the board is connected.
+    - **Monitor**: Use `idf.py -p <PORT> monitor` to see the new firmware output.
 
 ## Power Notes
 - USB Type-C power input (no USB-PD negotiation)

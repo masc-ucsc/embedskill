@@ -139,18 +139,18 @@ If the board is unresponsive or you need to verify it, follow this "Recipe". **I
 1. **Enter Bootloader**:
    - **Instruct**: **CRITICAL:** Ask the user to double-tap the **RESET** button (PB1) quickly right after power-up. Explicitly tell the user: "You MUST manually double-tap the button; do not rely on the tool's auto-reset."
    - **Confirm**: Wait for the user to confirm they have done this.
-   - **Verify**: Use `hagent_arduino` with `api='list_boards'`. It should appear with the correct FQBN.
+   - **Verify**: Run `arduino-cli board list`. It should appear with the correct FQBN.
    - **Troubleshoot**: If not found, ask user to try again or check cable.
 
 2. **Upload Test**:
    - **Instruct**: Tell the user you are ready to upload the Blink sketch.
    - **Confirm**: Wait for the user to reply "Ready" or "Go ahead".
-   - **Action**: Use `hagent_arduino` with `api='compile'` (defaults to Blink).
-   - **Action**: Use `hagent_arduino` with `api='upload'`.
+   - **Action**: Compile the sketch with `arduino-cli compile --fqbn <FQBN> <sketch_name>`.
+   - **Action**: Upload with `arduino-cli upload -p <PORT> --fqbn <FQBN> <sketch_name>`.
    - **Verify**: Ask user if the built-in LED (L) is blinking.
 
 3. **Monitor**:
-   - **Action**: Use `hagent_arduino` with `api='monitor'` to check for serial output.
+   - **Action**: Use `arduino-cli monitor -p <PORT>` to check for serial output.
 
 ## Power Notes
 - **USB (Micro-B) input**: Minimum 4.8–4.96 V (due to Schottky diode drop into DC-DC); board powered via USB connector or VUSB/VIN header pins.
