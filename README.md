@@ -146,6 +146,16 @@ python3 /path/to/embedskill/scripts/install_skill.py \
   --peripheral ssd1306_oled_i2c
 ```
 
+Install Arduino UNO Q with BME280 and SSD1306 OLED peripheral skills:
+
+```bash
+python3 /path/to/embedskill/scripts/install_skill.py \
+  --board uno_q \
+  --platform arduino \
+  --peripheral bme280 \
+  --peripheral ssd1306_oled_i2c
+```
+
 Install into a specific project directory:
 
 ```bash
@@ -218,6 +228,15 @@ Each board file covers: Board Overview metadata, Project Setup, Supported Platfo
 | `platform_config.md` | Master config — toolchain selection logic and general agent workflow |
 | `platform_arduino.md` | Arduino workflow guide using `arduino-cli` |
 | `platform_esp32.md` | ESP32 workflow guide using ESP-IDF (`idf.py`) and `esptool.py` |
+
+---
+
+## Peripheral Configurations (`data/peripheral/`)
+
+| File | Peripheral | Interface |
+|------|------------|-----------|
+| `peripheral_bme280.md` | BME280 temperature, humidity, and pressure sensor | I2C preferred; SPI optional |
+| `peripheral_ssd1306_oled_i2c.md` | SSD1306 128x64 OLED display | I2C |
 
 ---
 
